@@ -16,6 +16,7 @@ Threads.serialization('threads.sharedserialize')
 do -- start K datathreads (donkeys)
    if opt.nDonkeys > 0 then
       local options = opt -- make an upvalue to serialize over to donkey threads
+      local globalPath = gpath -- make an upvalue to serialize over to donkey threads
 		local se = startEpoch
       donkeys = Threads(
          opt.nDonkeys,
@@ -25,6 +26,7 @@ do -- start K datathreads (donkeys)
          function(idx)
 				torch.setnumthreads(1)
             opt = options -- pass to all donkeys via upvalue
+            gpath = globalPath -- pass to all donkeys via upvalue
             tid = idx
             local seed = se + idx
             torch.manualSeed(seed)

@@ -29,10 +29,10 @@ local function readLinesFrom( fpath )
 	return lines
 end
 
-genDb = function( setName )
+function genDb( setName )
 	local setid
 	if setName == 'train' then setid = 1 else setid = 2 end
-	local rootDir = '/home/doyoo/ssd/datain/UCF101FRAME/'
+	local rootDir = gpath.db.ucf101
 	local frameFormat = '%04d.jpg'
 	local imFormat = frameFormat:match( '.+%.(.+)' )
 	local cid2name  = readLinesFrom( paths.concat( rootDir, 'db_cid2name.txt' ), 'r' )

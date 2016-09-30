@@ -1,8 +1,8 @@
 require 'loadcaffe'
 function createModel( nGPU )
 	-- Load pre-trained CNN.
-	local proto = '/home/doyoo/workspace/net/caffe/bvlc_alexnet_deploy.prototxt'
-	local caffemodel = '/home/doyoo/workspace/net/caffe/bvlc_alexnet.caffemodel'
+	local proto = gpath.net.alex_caffe_proto
+	local caffemodel = gpath.net.alex_caffe_model
 	local features = loadcaffe.load( proto, caffemodel, opt.backend )
 	features:remove(  )
 	features:remove(  )

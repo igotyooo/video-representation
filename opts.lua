@@ -14,7 +14,7 @@ function M.parse(arg)
 	cmd:text()
 	cmd:text('Options:')
 	------------ General options --------------------
-	cmd:option('-cache', '/home/doyoo/workspace/dataout/', 'subdirectory in which to save/log experiments')
+	cmd:option('-cache', gpath.dataout, 'subdirectory in which to save/log experiments')
 	cmd:option('-data', 'UCF101', 'Name of dataset defined in "./db/"')
 	cmd:option('-GPU', 1, 'Default preferred GPU')
 	cmd:option('-nGPU', 4, 'Number of GPUs to use by default')

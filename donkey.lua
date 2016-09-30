@@ -5,7 +5,6 @@
 require 'image'
 paths.dofile( string.format( 'dataset_%s.lua', opt.task ) )
 paths.dofile( 'util.lua' )
-paths.dofile( string.format( './db/%s.lua', opt.data ) )
 local mean, std
 local function resizeImage( im )
 	local imSize = opt.imageSize

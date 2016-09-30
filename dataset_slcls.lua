@@ -5,6 +5,7 @@
 require 'torch'
 require 'image'
 local ffi = require 'ffi'
+paths.dofile( string.format( './db/%s.lua', opt.data ) )
 torch.setdefaulttensortype( 'torch.FloatTensor' )
 
 local dataset = torch.class( 'dataLoader' )

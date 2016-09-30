@@ -16,6 +16,7 @@ require 'nn'
 torch.setdefaulttensortype('torch.FloatTensor')
 torch.setnumthreads(1)
 
+gpath = paths.dofile('setgpath.lua')
 local opts = paths.dofile('opts.lua')
 
 opt = opts.parse(arg)
