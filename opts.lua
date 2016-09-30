@@ -37,7 +37,7 @@ function M.parse(arg)
 	cmd:option('-momentum', 0.9, 'momentum')
 	cmd:option('-weightDecay', 5e-4, 'weight decay')
 	---------- Model options ----------------------------------
-	cmd:option('-netType', 'alexpt_lstm', 'Options: alex_lstm, alexpt_lstm')
+	cmd:option('-netType', 'alexpt_lstm256', 'Specify a network.')
 	cmd:option('-inputIsCaffe', 1, 'Network taking input is loaded from Caffe? 1 for yes, 0 for no.')
 	cmd:option('-seqLength', 16, 'Number of frames per input video')
 	cmd:option('-task', 'slcls', 'slcls | mlcls')
