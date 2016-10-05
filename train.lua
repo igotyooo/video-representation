@@ -17,54 +17,13 @@ require 'optim'
 ]]--
 
 -- Setup a reused optimization state (for sgd). If needed, reload it from disk
-local numModules = #model.modules
-local optimState = {}
-for m = 1, numModules do
-	optimState[m] = {
-	learningRate = opt.LR[m],
-	learningRateDecay = 0.0,
-	momentum = opt.momentum,
-	dampening = 0.0,
-	weightDecay = opt.weightDecay}
-end
-assert(numModules == #opt.LR)
-
+local parameters, gradParameters, optimState = groupParams(model)
+assert(#parameters == #gradParameters and #parameters == #optimState)
 if startEpoch > 1 then
 	local optimPath = opt.pathOptim:format(startEpoch - 1)
     assert(paths.filep(optimPath), 'File not found: ' .. optimPath)
     print('Loading optimState from file: ' .. optimPath)
     optimState = torch.load(optimPath)
-end
-
--- Learning rate annealing schedule. We will build a new optimizer for
--- each epoch.
---
--- By default we follow a known recipe for a 55-epoch training. If
--- the learningRate command-line parameter has been specified, though,
--- we trust the user is doing something manual, and will use her
--- exact settings for all optimization.
---
--- Return values:
---    diff to apply to optimState,
---    true IFF this is the first epoch of a new regime
-local function paramsForEpoch(epoch)
-    if opt.LR ~= 0.0 then -- if manually specified
-        return { }
-    end
-    local regimes = {
-        -- start, end,    LR,   WD,
-        {  1,     18,   1e-2,   5e-4, },
-        { 19,     29,   5e-3,   5e-4  },
-        { 30,     43,   1e-3,   0 },
-        { 44,     52,   5e-4,   0 },
-        { 53,    1e8,   1e-4,   0 },
-    }
-
-    for _, row in ipairs(regimes) do
-        if epoch >= row[1] and epoch <= row[2] then
-            return { learningRate=row[3], weightDecay=row[4] }, epoch == row[1]
-        end
-    end
 end
 
 -- 2. Create loggers.
@@ -77,16 +36,6 @@ local eval_epoch, loss_epoch
 function train()
    print('==> doing epoch on training data:')
    print("==> online epoch # " .. epoch)
-   local params, newRegime = paramsForEpoch(epoch)
-   if newRegime then
-      optimState = {
-         learningRate = params.learningRate,
-         learningRateDecay = 0.0,
-         momentum = opt.momentum,
-         dampening = 0.0,
-         weightDecay = params.weightDecay
-      }
-   end
    batchNumber = 0
    cutorch.synchronize()
 
@@ -144,13 +93,6 @@ local labels = torch.CudaTensor()
 local timer = torch.Timer()
 local dataTimer = torch.Timer()
 
-local parameters, gradParameters = {}, {}
-for m, module in pairs(model.modules) do
-	local w, gw = module:getParameters()
-	parameters[ m ] = w
-	gradParameters[ m ] = gw
-end
-
 -- 4. trainBatch - Used by train() to train a single batch after the data is loaded.
 function trainBatch(inputsCPU, labelsCPU, evaluateBatch)
    cutorch.synchronize()
@@ -165,31 +107,15 @@ function trainBatch(inputsCPU, labelsCPU, evaluateBatch)
 	model:zeroGradParameters()
 
 	-- Forward pass.
-   local outputs = {}
-	for m, module in pairs(model.modules) do
-		if m == 1 then
-			outputs[m] = module:forward(inputs)
-		else
-			outputs[m] = module:forward(outputs[m - 1])
-		end
-	end
-	local err = criterion:forward(outputs[numModules], labels)
+	local outputs = model:forward(inputs)
+	local err = criterion:forward(outputs, labels)
+
 	-- Backward pass.
-	local gradOutputs = criterion:backward(outputs[numModules], labels)
-	local gradBuff
-	for m = numModules,1,-1 do
-		if optimState[m].learningRate == 0 then break end
-		if m == numModules then
-			gradBuff = model.modules[m]:backward(outputs[m - 1], gradOutputs)
-		elseif m == 1 then
-			gradBuff = model.modules[m]:backward(inputs, gradBuff)
-		else
-			gradBuff = model.modules[m]:backward(outputs[m - 1], gradBuff)
-		end
-	end
+	local gradOutputs = criterion:backward(outputs, labels)
+	model:backward(inputs, gradOutputs)
+
 	-- Update weights.
-	for m = numModules,1,-1 do
-		if optimState[m].learningRate == 0 then break end
+	for m = 1,#parameters do
 		optim.sgd(function(x) return _, gradParameters[m] end, parameters[m], optimState[m])
 	end
 
@@ -203,7 +129,7 @@ function trainBatch(inputsCPU, labelsCPU, evaluateBatch)
    batchNumber = batchNumber + 1
    loss_epoch = loss_epoch + err
    -- Task-specific evaluation.
-	local eval = evaluateBatch(outputs[numModules], labelsCPU, opt.seqLength)
+	local eval = evaluateBatch(outputs, labelsCPU, opt.seqLength)
 	eval_epoch = eval_epoch + eval
    -- Print information
    print(('Epoch: [%d][%d/%d]\tTime %.3f Err %.4f Eval %.2f DataLoadingTime %.3f'):format(

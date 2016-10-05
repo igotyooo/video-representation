@@ -76,3 +76,40 @@ function createModel( nGPU )
 	assert( not opt.keepAspect )
    return model
 end
+
+function groupParams( model )
+	local params, grads, optims = {  }, {  }, {  }
+	params[ 1 ], grads[ 1 ] = model.modules[ 1 ]:getParameters(  )
+	params[ 2 ], grads[ 2 ] = model.modules[ 2 ].modules[ 1 ]:getParameters(  )
+	params[ 3 ], grads[ 3 ] = model.modules[ 2 ].modules[ 2 ]:getParameters(  )
+	params[ 4 ], grads[ 4 ] = model.modules[ 3 ]:getParameters(  )
+	optims[ 1 ] = {
+		learningRate = opt.lrFeature,
+		learningRateDecay = 0.0,
+		momentum = opt.momentum,
+		dampening = 0.0,
+		weightDecay = opt.weightDecay 
+	}
+	optims[ 2 ] = {
+		learningRate = opt.lrLinear,
+		learningRateDecay = 0.0,
+		momentum = opt.momentum,
+		dampening = 0.0,
+		weightDecay = opt.weightDecay 
+	}
+	optims[ 3 ] = {
+		learningRate = opt.lrLstm,
+		learningRateDecay = 0.0,
+		momentum = opt.momentum,
+		dampening = 0.0,
+		weightDecay = opt.weightDecay 
+	}
+	optims[ 4 ] = {
+		learningRate = opt.lrLinear,
+		learningRateDecay = 0.0,
+		momentum = opt.momentum,
+		dampening = 0.0,
+		weightDecay = opt.weightDecay 
+	}
+	return params, grads, optims
+end

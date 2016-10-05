@@ -33,7 +33,9 @@ function M.parse(arg)
 	cmd:option('-videoLevelTest', 0, 'To do video-level test, give a target epoch number of which model should be evaluated.')
 	cmd:option('-saveFeature', 2, 'Module ID of model from which features are saved.')
 	---------- Optimization options ----------------------
-	cmd:option('-LR', '0,16e-5,16e-5', 'Learning rates of modules.')
+	cmd:option('-lrFeature', 0, 'Learning rates for conv feature layer.')
+	cmd:option('-lrLstm', 16e-5, 'Learning rates for LSTM layer.')
+	cmd:option('-lrLinear', 1e-3, 'Learning rates for linear layer.')
 	cmd:option('-momentum', 0.9, 'momentum')
 	cmd:option('-weightDecay', 5e-4, 'weight decay')
 	---------- Model options ----------------------------------
@@ -79,8 +81,6 @@ function M.parse(arg)
 	opt.normalizeStd = opt.normalizeStd > 0
 	opt.inputIsCaffe = opt.inputIsCaffe > 0
 	opt.keepAspect = opt.keepAspect > 0
-	opt.LR = opt.LR:split(',')
-	for k,v in pairs(opt.LR) do opt.LR[k] = tonumber(v) end
 	return opt
 end
 
