@@ -19,6 +19,7 @@ require 'LSTM'
 
 -- 1. Create Network
 -- 1.1 If preloading option is set, preload weights from existing models appropriately
+paths.dofile('models/' .. opt.netType .. '.lua')
 startEpoch = 1
 for i=1,opt.nEpochs do
 	local modelPath = opt.pathModel:format(i)
@@ -38,7 +39,6 @@ elseif opt.startFrom ~= '' then
 else
 	assert(opt.startFrom == '')
 	print('No model to continue.')
-	paths.dofile('models/' .. opt.netType .. '.lua')
 	print('=> Creating model from file: models/' .. opt.netType .. '.lua')
 	model = createModel(opt.nGPU) -- for the model creation code, check the models/ folder
 	if opt.backend == 'cudnn' then
