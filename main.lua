@@ -44,7 +44,6 @@ if opt.videoLevelTest == 0 then
 	for i=startEpoch,opt.nEpochs do
 		train()
 		test()
-		sys.sleep(120)
 		epoch = epoch + 1
 	end
 else
