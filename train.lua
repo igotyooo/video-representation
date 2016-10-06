@@ -132,9 +132,12 @@ function trainBatch(inputsCPU, labelsCPU, evaluateBatch)
    -- Task-specific evaluation.
 	local eval = evaluateBatch(outputs, labelsCPU, opt.seqLength)
 	eval_epoch = eval_epoch + eval
+	local fwdbwdTime = timer:time().real
+	local totalTime = dataLoadingTime + fwdbwdTime
+	local speed = opt.batchSize / totalTime
    -- Print information
-   print(('Epoch: [%d][%d/%d]\tTime %.3f Err %.4f Eval %.2f DataLoadingTime %.3f'):format(
-          epoch, batchNumber, epochSize, timer:time().real, err, eval, dataLoadingTime))
+   print(('Epoch %d) %d/%d, %dim/s (%.2fs=load%.2fs+fwdbwd%.2fs), err %.4f, eval %.2f'):format(
+          epoch, batchNumber, epochSize, speed, totalTime, dataLoadingTime, fwdbwdTime, err, eval))
 
    dataTimer:reset()
 end

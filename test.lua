@@ -74,6 +74,6 @@ function testBatch(inputsCPU, labelsCPU, evaluateBatch)
 	eval_center = eval_center + eval
 
    if batchNumber % 1024 == 0 then
-      print(('Epoch: Testing [%d][%d/%d]'):format(epoch, batchNumber, nTest*opt.seqLength)) -- DOYOO) seqLength multiplied.
+      print(('Epoch %d) testing %d/%d'):format(epoch, batchNumber, nTest*opt.seqLength)) -- DOYOO) seqLength multiplied.
    end
 end
