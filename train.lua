@@ -135,8 +135,8 @@ function trainBatch(inputsCPU, labelsCPU, evaluateBatch)
 	local totalTime = dataLoadingTime + fwdbwdTime
 	local speed = opt.batchSize / totalTime
    -- Print information
-   print(('Epoch %d) %d/%d, %dim/s (%.2fs=load%.2fs+fwdbwd%.2fs), err %.4f, eval %.2f'):format(
-          epoch, batchNumber, opt.epochSize, speed, totalTime, dataLoadingTime, fwdbwdTime, err, eval))
+   print(('Epoch %d) %d/%d, %dim/s (load %.2fs, fwdbwd%.2fs), err %.4f, eval %.2f'):format(
+          epoch, batchNumber, opt.epochSize, speed, dataLoadingTime, fwdbwdTime, err, eval))
 
    dataTimer:reset()
 end
