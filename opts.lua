@@ -28,6 +28,7 @@ function M.parse(arg)
 	cmd:option('-normalizeStd', 0, 'Normalize piexel std to 1. 1 for yes, 0 for no.')
 	------------- Training options --------------------
 	cmd:option('-nEpochs', 55, 'Number of total epochs to run')
+	cmd:option('-epochSize', 10000, 'Number of batches per epoch')
 	cmd:option('-batchSize', 128, 'Frame-level mini-batch size (1 = pure stochastic)')
 	cmd:option('-videoLevelTest', 0, 'To do video-level test, give a target epoch number of which model should be evaluated.')
 	cmd:option('-saveFeature', 2, 'Module ID of model from which features are saved.')

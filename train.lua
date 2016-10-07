@@ -30,7 +30,6 @@ end
 trainLogger = optim.Logger(opt.pathTrainLog:format(startEpoch))
 local batchNumber
 local eval_epoch, loss_epoch
-local epochSize = math.ceil(nTrain * opt.seqLength  / opt.batchSize)
 
 -- 3. train - this function handles the high-level training loop,
 --            i.e. load data, train model, save model and state to disk
@@ -46,7 +45,7 @@ function train()
    local tm = torch.Timer()
    eval_epoch = 0
    loss_epoch = 0
-   for i=1,epochSize do
+   for i=1,opt.epochSize do
       -- queue jobs to data-workers
       donkeys:addjob(
          -- the job callback (runs in data-worker thread)
@@ -64,8 +63,8 @@ function train()
    donkeys:synchronize()
    cutorch.synchronize()
 
-   eval_epoch = eval_epoch / epochSize
-   loss_epoch = loss_epoch / epochSize
+   eval_epoch = eval_epoch / opt.epochSize
+   loss_epoch = loss_epoch / opt.epochSize
 
    trainLogger:add{
       ['EvalMetric'] = eval_epoch,
@@ -137,7 +136,7 @@ function trainBatch(inputsCPU, labelsCPU, evaluateBatch)
 	local speed = opt.batchSize / totalTime
    -- Print information
    print(('Epoch %d) %d/%d, %dim/s (%.2fs=load%.2fs+fwdbwd%.2fs), err %.4f, eval %.2f'):format(
-          epoch, batchNumber, epochSize, speed, totalTime, dataLoadingTime, fwdbwdTime, err, eval))
+          epoch, batchNumber, opt.epochSize, speed, totalTime, dataLoadingTime, fwdbwdTime, err, eval))
 
    dataTimer:reset()
 end

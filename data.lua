@@ -52,12 +52,10 @@ assert(nClasses == opt.nClasses,
        "nClasses is reported different in the data loader, and in the commandline options")
 print('nClasses: ', nClasses)
 
-nTrain, nTest = 0
-donkeys:addjob(function() return trainLoader.vid2path:size( 1 ), testLoader.vid2path:size( 1 ) end, function(ntr, nte) nTrain = ntr nTest = nte end)
+nTest = 0
+donkeys:addjob(function() return testLoader.vid2path:size( 1 ) end, function(c) nTest = c end)
 donkeys:synchronize()
-assert(nTrain > 0, "Failed to get nTrain")
 assert(nTest > 0, "Failed to get nTest")
-print('nTrain: ', nTrain)
 print('nTest: ', nTest)
 
 testVideoPaths = nil
