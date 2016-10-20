@@ -1,13 +1,14 @@
 require 'loadcaffe'
 function createModel( nGPU )
 	-- Set params.
+	local featSize = 4096
 	local fcSize = 4096
 	local lstmSize = 256
 	local numCls = opt.nClasses
 
 	-- Load pre-trained CNN.
 	-- In:  ( numVideo X seqLength ), 3, 224, 224
-	-- Out: ( numVideo X seqLength ), 4096
+	-- Out: ( numVideo X seqLength ), featSize
 	local proto = gpath.net.alex_caffe_proto
 	local caffemodel = gpath.net.alex_caffe_model
 	local features = loadcaffe.load( proto, caffemodel, opt.backend )
@@ -20,11 +21,11 @@ function createModel( nGPU )
 	features = makeDataParallel( features, nGPU )
 
 	-- Create LSTM tower.
-	-- In:  ( numVideo X seqLength ), 4096
+	-- In:  ( numVideo X seqLength ), featSize
 	-- Out: ( numVideo X seqLength ), lstmSize
 	local lstm = nn.Sequential(  )
-	lstm:add( nn.View( -1, opt.seqLength, 4096 ) ) -- LSTM input is numVideo, SeqLength, vectorDim
-	lstm:add( nn.LSTM( 4096, lstmSize ) )
+	lstm:add( nn.View( -1, opt.seqLength, featSize ) ) -- LSTM input is numVideo, SeqLength, vectorDim
+	lstm:add( nn.LSTM( featSize, lstmSize ) )
 	lstm:add( nn.View( -1, lstmSize ) )
 	lstm:add( nn.Dropout( 0.5 ) )
 	lstm:cuda(  )
@@ -73,7 +74,7 @@ function groupParams( model )
 		weightDecay = opt.weightDecay 
 	}
 	optims[ 3 ] = {
-		learningRate = opt.lrLinear,
+		learningRate = opt.lrClassifier,
 		learningRateDecay = 0.0,
 		momentum = opt.momentum,
 		dampening = 0.0,
