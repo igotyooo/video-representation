@@ -35,7 +35,10 @@ function M.parse(arg)
 	---------- Optimization options ----------------------
 	cmd:option('-lrFeature', 0, 'Learning rates for conv feature layer.')
 	cmd:option('-lrLstm', 16e-5, 'Learning rates for LSTM layer.')
-	cmd:option('-lrLinear', 1e-3, 'Learning rates for linear layer.')
+	cmd:option('-lrFc', 1e-3, 'Learning rates for FC layer.')
+	cmd:option('-lrClassifier', 1e-3, 'Learning rates for classifier layer.')
+	cmd:option('-lrClassWeight', 1e-3, 'Learning rates for class-dependent weight layer.')
+	cmd:option('-lrAgent', 1e-4, 'Learning rates for agent layer.')
 	cmd:option('-momentum', 0.9, 'momentum')
 	cmd:option('-weightDecay', 5e-4, 'weight decay')
 	---------- Model options ----------------------------------
