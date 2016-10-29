@@ -28,7 +28,7 @@ do -- start K datathreads (donkeys)
             opt = options -- pass to all donkeys via upvalue
             gpath = globalPath -- pass to all donkeys via upvalue
             tid = idx
-            local seed = se + idx
+            local seed = (se - 1) * 32 + idx
             torch.manualSeed(seed)
             print(string.format('Starting donkey with id: %d seed: %d', tid, seed))
             paths.dofile('donkey.lua')
