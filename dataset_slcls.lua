@@ -97,6 +97,10 @@ function dataset:getVideo( vid )
 	return video, label
 end
 evaluateBatch = function( fid2out, fid2gt, seqLength )
+	if type( fid2out ) == 'table' then
+		for l = 2, #fid2out do fid2out[ 1 ]:add( fid2out[ l ] ) end
+		fid2out = fid2out[ 1 ] / #fid2out
+	end
 	local _, fid2pcid = fid2out:float(  ):sort( 2, true )
 	local batchSize = fid2out:size( 1 )
 	local numVideo = batchSize / seqLength
