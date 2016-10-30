@@ -49,10 +49,21 @@ else
 	end
 end
 -- 2. Create Criterion
-if opt.task == 'slcls' then
-	criterion = nn.ClassNLLCriterion()
-elseif opt.task == 'mlcls' then
-	criterion = nn.MultiLabelMarginCriterion()
+if opt.numLoss == 1 then
+	if opt.task == 'slcls' then
+		criterion = nn.ClassNLLCriterion()
+	elseif opt.task == 'mlcls' then
+		criterion = nn.MultiLabelMarginCriterion()
+	end
+else
+	criterion = nn.ParallelCriterion(true)
+	for n = 1, opt.numLoss do
+		if opt.task == 'slcls' then
+			criterion:add(nn.ClassNLLCriterion(), 1 / opt.numLoss)
+		elseif opt.task == 'mlcls' then
+			criterion:add(nn.MultiLabelMarginCriterion(), 1 / opt.numLoss)
+		end
+	end
 end
 
 print('=> Model')

@@ -46,6 +46,7 @@ function M.parse(arg)
 	cmd:option('-inputIsCaffe', 1, 'Network taking input is loaded from Caffe? 1 for yes, 0 for no.')
 	cmd:option('-seqLength', 16, 'Number of frames per input video')
 	cmd:option('-task', 'slcls', 'slcls | mlcls')
+	cmd:option('-numLoss', 1, 'Number of losses.')
 	cmd:option('-startFrom', '', 'Path to the initial model. Using it for LR decay is recommended only.')
 	cmd:text()
 

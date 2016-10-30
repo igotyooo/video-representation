@@ -12,6 +12,7 @@ require 'paths'
 require 'xlua'
 require 'optim'
 require 'nn'
+require 'nngraph'
 
 torch.setdefaulttensortype('torch.FloatTensor')
 torch.setnumthreads(1)
