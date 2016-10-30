@@ -122,6 +122,10 @@ evaluateBatch = function( fid2out, fid2gt, seqLength )
 	return top1
 end
 evaluateVideo = function( outputs, label, seqLength )
+	if type( outputs ) == 'table' then
+		for l = 2, #outputs do outputs[ 1 ]:add( outputs[ l ] ) end
+		outputs = outputs[ 1 ] / #outputs
+	end
 	local numFrame = outputs:size( 1 )
 	local numCls = outputs:size( 2 )
 	local numSeq = numFrame / seqLength

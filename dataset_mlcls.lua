@@ -100,6 +100,10 @@ function dataset:getVideo( vid )
 	return video, labels
 end
 evaluateBatch = function( fid2out, fid2cids, seqLength )
+	if type( fid2out ) == 'table' then
+		for l = 2, #fid2out do fid2out[ 1 ]:add( fid2out[ l ] ) end
+		fid2out = fid2out[ 1 ] / #fid2out
+	end
 	local numVideo = fid2out:size( 1 ) / seqLength
 	local numDim = fid2out:size( 2 )
 	local map = 0
@@ -122,6 +126,10 @@ evaluateBatch = function( fid2out, fid2cids, seqLength )
 	return map
 end
 evaluateVideo = function( outputs, labels, features, seqLength )
+	if type( outputs ) == 'table' then
+		for l = 2, #outputs do outputs[ 1 ]:add( outputs[ l ] ) end
+		outputs = outputs[ 1 ] / #outputs
+	end
 	local numFrame = outputs:size( 1 )
 	local numCls = outputs:size( 2 )
 	local dimFeat = features[ 1 ]:numel(  )
