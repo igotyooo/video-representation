@@ -6,16 +6,20 @@
 --  LICENSE file in the root directory of this source tree. An additional grant
 --  of patent rights can be found in the PATENTS file in the same directory.
 --
-testLogger = optim.Logger(opt.pathTestLog:format(startEpoch))
 
 local batchNumber
 local eval_center, loss
 local timer = torch.Timer()
+local function tensor2str(tensor, precision)
+	local str = ''
+	for i=1,tensor:numel() do str = string.format('%s' .. precision .. ' ', str, tensor[i]) end
+	return str
+end
 
 function test()
    print('==> doing epoch on validation data:')
    print("==> online epoch # " .. epoch)
-
+	testLogger = io.open(opt.pathTestLog:format(startEpoch), 'a')
    batchNumber = 0
    cutorch.synchronize()
    timer:reset()
@@ -23,7 +27,7 @@ function test()
    -- set the dropouts to evaluate mode
    model:evaluate()
 
-   eval_center = 0
+   eval_center = torch.Tensor(opt.numLoss):fill(0)
    loss = 0
    for i=1,nTest*opt.seqLength/opt.batchSize do -- DOYOO) Multiplied by seqLength.
       local indexStart = (i-1) * opt.batchSize / opt.seqLength + 1 -- DOYOO) Video index, not image index. indexEnd removed.
@@ -43,16 +47,11 @@ function test()
 
    eval_center = eval_center / (nTest*opt.seqLength/opt.batchSize)
    loss = loss / (nTest*opt.seqLength/opt.batchSize) -- because loss is calculated per batch DOYOO) Divided by seqLength.
-   testLogger:add{
-		['EvalMetric'] = eval_center,
-		['Loss'] = loss
-   }
-   print(string.format('Epoch: [%d][TESTING SUMMARY] Total Time(s): %.2f \t'
-                          .. 'average loss (per batch): %.2f \t '
-                          .. 'evaluation: %.2f\t ',
-                       epoch, timer:time().real, loss, eval_center))
 
-   print('\n')
+	local eval_center_str = tensor2str(eval_center, '%.4f')
+	testLogger:write(string.format('%.4f %s\n', loss, eval_center_str))
+	testLogger:close()
+	print(string.format('Epoch %d) time %.2fs, avg loss %.4f, eval %s\n', epoch, timer:time().real, loss, eval_center_str))
 
 end -- of test()
 -----------------------------------------------------------------------------

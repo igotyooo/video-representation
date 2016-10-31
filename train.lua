@@ -27,15 +27,20 @@ if startEpoch > 1 then
 end
 
 -- 2. Create loggers.
-trainLogger = optim.Logger(opt.pathTrainLog:format(startEpoch))
 local batchNumber
 local eval_epoch, loss_epoch
+local function tensor2str(tensor, precision)
+	local str = ''
+	for i=1,tensor:numel() do str = string.format('%s' .. precision .. ' ', str, tensor[i]) end
+	return str
+end
 
 -- 3. train - this function handles the high-level training loop,
 --            i.e. load data, train model, save model and state to disk
 function train()
    print('==> doing epoch on training data:')
    print("==> online epoch # " .. epoch)
+	trainLogger = io.open(opt.pathTrainLog:format(startEpoch), 'a')
    batchNumber = 0
    cutorch.synchronize()
 
@@ -43,7 +48,7 @@ function train()
    model:training()
 
    local tm = torch.Timer()
-   eval_epoch = 0
+   eval_epoch = torch.Tensor(opt.numLoss):fill( 0 )
    loss_epoch = 0
    for i=1,opt.epochSize do
       -- queue jobs to data-workers
@@ -66,15 +71,10 @@ function train()
    eval_epoch = eval_epoch / opt.epochSize
    loss_epoch = loss_epoch / opt.epochSize
 
-   trainLogger:add{
-      ['EvalMetric'] = eval_epoch,
-      ['Loss'] = loss_epoch
-   }
-   print(string.format('Epoch: [%d][TRAINING SUMMARY] Total Time(s): %.2f\t'
-                          .. 'average loss (per batch): %.2f \t '
-                          .. 'evaluation: %.2f\t',
-                       epoch, tm:time().real, loss_epoch, eval_epoch))
-   print('\n')
+	local eval_epoch_str = tensor2str(eval_epoch, '%.4f')
+	trainLogger:write(string.format('%.4f %s\n', loss_epoch, eval_epoch_str))
+	trainLogger:close()
+	print(string.format('Epoch %d) time %.2fs, avg loss %.4f, eval %s\n', epoch, tm:time().real, loss_epoch, eval_epoch_str))
 
    -- save model
    collectgarbage()
@@ -131,12 +131,13 @@ function trainBatch(inputsCPU, labelsCPU, evaluateBatch)
    -- Task-specific evaluation.
 	local eval = evaluateBatch(outputs, labelsCPU, opt.seqLength)
 	eval_epoch = eval_epoch + eval
+	local eval_str = tensor2str(eval, '%.2f')
 	local fwdbwdTime = timer:time().real
 	local totalTime = dataLoadingTime + fwdbwdTime
 	local speed = opt.batchSize / totalTime
    -- Print information
-   print(('Epoch %d) %d/%d, %dim/s (load %.2fs, fwdbwd %.2fs), err %.4f, eval %.2f'):format(
-          epoch, batchNumber, opt.epochSize, speed, dataLoadingTime, fwdbwdTime, err, eval))
+   print(('Epoch %d) %d/%d, %dim/s (load %.2fs, fwdbwd %.2fs), err %.2f, eval %s'):format(
+          epoch, batchNumber, opt.epochSize, speed, dataLoadingTime, fwdbwdTime, err, eval_str))
 
    dataTimer:reset()
 end

@@ -97,29 +97,31 @@ function dataset:getVideo( vid )
 	return video, label
 end
 evaluateBatch = function( fid2out, fid2gt, seqLength )
-	if type( fid2out ) == 'table' then
-		for l = 2, #fid2out do fid2out[ 1 ]:add( fid2out[ l ] ) end
-		fid2out = fid2out[ 1 ] / #fid2out
-	end
-	local _, fid2pcid = fid2out:float(  ):sort( 2, true )
-	local batchSize = fid2out:size( 1 )
+	if type( fid2out ) ~= 'table' then fid2out = { fid2out } end
+	local numOut = #fid2out
+	local batchSize = fid2out[ 1 ]:size( 1 )
 	local numVideo = batchSize / seqLength
-	local vid2true = torch.zeros( numVideo, 1 )
-	local top1 = 0
-	for v = 1, numVideo do
-		local fbias = ( v - 1 ) * seqLength
-		local pcid2num = torch.zeros( fid2out:size( 2 ) )
-		local cid = fid2gt[ fbias + 1 ]
-		for f = 1, seqLength do
-			local fid = fbias + f
-			local pcid = fid2pcid[ fid ][ 1 ]
-			pcid2num[ pcid ] = pcid2num[ pcid ] + 1
+	local oid2eval = torch.Tensor( numOut ):fill( 0 )
+	for oid, out in pairs( fid2out ) do
+		local _, fid2pcid = out:float(  ):sort( 2, true )
+		local vid2true = torch.zeros( numVideo, 1 )
+		local top1 = 0
+		for v = 1, numVideo do
+			local fbias = ( v - 1 ) * seqLength
+			local pcid2num = torch.zeros( out:size( 2 ) )
+			local cid = fid2gt[ fbias + 1 ]
+			for f = 1, seqLength do
+				local fid = fbias + f
+				local pcid = fid2pcid[ fid ][ 1 ]
+				pcid2num[ pcid ] = pcid2num[ pcid ] + 1
+			end
+			local _, rank2pcid = pcid2num:sort( true )
+			if cid == rank2pcid[ 1 ] then top1 = top1 + 1 end
 		end
-		local _, rank2pcid = pcid2num:sort( true )
-		if cid == rank2pcid[ 1 ] then top1 = top1 + 1 end
+		top1 = top1 * 100 / numVideo
+		oid2eval[ oid ] = top1
 	end
-	top1 = top1 * 100 / numVideo
-	return top1
+	return oid2eval
 end
 evaluateVideo = function( outputs, label, seqLength )
 	if type( outputs ) == 'table' then
