@@ -39,10 +39,10 @@ function createModel( nGPU )
 	local lstm = nn.Sequential(  )
 	lstm:add( nn.View( -1, seqLength, featSize ) ) -- LSTM input is numVideo, SeqLength, vectorDim
 	lstm:add( nn.LSTM( featSize, lstmSize ) )
+	lstm:add( nn.View( -1, lstmSize ) )
 	lstm:add( nn.Tanh(  ) )
 	lstm:add( nn.Normalize( 2 ) )
 	lstm:add( nn.Dropout( 0.5 ) )
-	lstm:add( nn.View( -1, lstmSize ) )
 	lstm:cuda(  )
 
 	-- Create agent tower.
