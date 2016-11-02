@@ -57,7 +57,23 @@ function createModel( nGPU )
 	agent:add( nn.ConcatTable(  ):add( nn.Identity(  ) ):add( nn.Sequential(  ):add(nn.MulConstant( -1 ) ):add( nn.AddConstant( 1 ) ) ) )
 	agent:add( nn.JoinTable( 2 ) )
 	agent:cuda(  )
-	
+
+	-- Create FC classifier.
+	-- In:  ( numVideo X seqLength ), hiddenSize
+	-- Out: ( numVideo X seqLength ), numClass
+	local classifierFc = nn.Sequential(  )
+	classifierFc:add( nn.Linear( hiddenSize, numCls ) )
+	classifierFc:add( nn.LogSoftMax(  ) )
+	classifierFc:cuda(  )
+
+	-- Create LSTM classifier.
+	-- In:  ( numVideo X seqLength ), hiddenSize
+	-- Out: ( numVideo X seqLength ), numClass
+	local classifierLstm = nn.Sequential(  )
+	classifierLstm:add( nn.Linear( hiddenSize, numCls ) )
+	classifierLstm:add( nn.LogSoftMax(  ) )
+	classifierLstm:cuda(  )
+
 	-- Create agent classifier.
 	-- In:  ( numVideo X seqLength ), ( hiddenSize X 2 )
 	-- Out: ( numVideo X seqLength ), numClass
