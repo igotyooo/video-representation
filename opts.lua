@@ -47,6 +47,7 @@ function M.parse(arg)
 	cmd:option('-seqLength', 16, 'Number of frames per input video')
 	cmd:option('-task', 'slcls', 'slcls | mlcls')
 	cmd:option('-numLoss', 1, 'Number of losses.')
+	cmd:option('-agentBound', 0, 'Agent bound.')
 	cmd:option('-startFrom', '', 'Path to the initial model. Using it for LR decay is recommended only.')
 	cmd:text()
 
