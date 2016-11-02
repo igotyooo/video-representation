@@ -79,12 +79,6 @@ function createModel( nGPU )
 	local m = nn.gModule( { x }, { h_fclstmagentcls } )
 	m:cuda(  )
 
-	local input = torch.randn( numVideo * seqLength, featSize )
-	local hfc = fc:forward( input )
-	local hlstm = lstm:forward( input )
-	local hagent = agent:forward( input )
-	local tdb = require( 'fb.debugger' ) tdb.enter()
-
 	-- Combine sub models.
 	-- In:  ( numVideo X seqLength ), 3, 224, 224
 	-- Out: ( numVideo X seqLength ), numClass
