@@ -106,7 +106,7 @@ function createModel( nGPU )
 	model:cuda(  )
 
 	-- Check options.
-	assert( opt.numLoss == 1 )
+	assert( opt.numLoss == 3 )
 	assert( opt.inputIsCaffe )
 	assert( not opt.normalizeStd )
 	assert( not opt.keepAspect )
