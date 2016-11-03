@@ -100,9 +100,9 @@ end
 function groupParams( model )
 	local params, grads, optims = {  }, {  }, {  }
 	params[ 1 ], grads[ 1 ] = model.modules[ 1 ]:getParameters(  ) -- Features.
-	params[ 2 ], grads[ 2 ] = model.modules[ 2 ].modules[ 1 ]:modules[ 1 ].modules[ 1 ].modules[ 1 ]:getParameters(  ) -- FC.
-	params[ 3 ], grads[ 3 ] = model.modules[ 2 ].modules[ 1 ]:modules[ 1 ].modules[ 1 ].modules[ 2 ]:getParameters(  ) -- LSTM.
-	params[ 4 ], grads[ 4 ] = model.modules[ 2 ].modules[ 1 ]:modules[ 2 ]:getParameters(  ) -- Agent.
+	params[ 2 ], grads[ 2 ] = model.modules[ 2 ].modules[ 1 ].modules[ 1 ].modules[ 1 ].modules[ 1 ]:getParameters(  ) -- FC.
+	params[ 3 ], grads[ 3 ] = model.modules[ 2 ].modules[ 1 ].modules[ 1 ].modules[ 1 ].modules[ 2 ]:getParameters(  ) -- LSTM.
+	params[ 4 ], grads[ 4 ] = model.modules[ 2 ].modules[ 1 ].modules[ 2 ]:getParameters(  ) -- Agent.
 	params[ 5 ], grads[ 5 ] = model.modules[ 3 ]:getParameters(  ) -- Classifier.
 	local tdb = require( 'fb.debugger' ) tdb.enter(  )
 	optims[ 1 ] = { -- Features.
