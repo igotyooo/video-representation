@@ -99,6 +99,13 @@ function createModel( nGPU )
 	return model
 end
 
+function loadModel( modelPath )
+	local model0 = createModel( opt.nGPU )
+	local model = loadDataParallel( modelPath, opt.nGPU )
+	model0:getParameters(  ):copy( model:getParameters(  ) )
+	return model0
+end
+
 function groupParams( model )
 	assert( opt.lrFc == opt.lrLstm )
 	assert( opt.lrFc == opt.lrAgent )

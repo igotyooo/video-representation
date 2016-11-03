@@ -35,7 +35,7 @@ if startEpoch ~= 1 then
    model = loadDataParallel(opt.pathModel:format(startEpoch - 1), opt.nGPU) -- defined in util.lua
 elseif opt.startFrom ~= '' then
    print('Loading model of ' .. opt.startFrom);
-	model = loadDataParallel(opt.startFrom, opt.nGPU)
+	model = loadModel(opt.startFrom)
 else
 	assert(opt.startFrom == '')
 	print('No model to continue.')
