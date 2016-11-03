@@ -8,6 +8,7 @@ function createModel( nGPU )
 	-- Load pre-trained CNN.
 	-- In:  ( numVideo X seqLength ), 3, 224, 224
 	-- Out: ( numVideo X seqLength ), featSize
+	print( 'Load pre-trained Caffe feature.' )
 	local proto = gpath.net.alex_caffe_proto
 	local caffemodel = gpath.net.alex_caffe_model
 	local features = loadcaffe.load( proto, caffemodel, opt.backend )
@@ -19,32 +20,30 @@ function createModel( nGPU )
 	features:cuda(  )
 	features = makeDataParallel( features, nGPU )
 
-	-- Create LSTM tower.
+	-- Create FC tower.
 	-- In:  ( numVideo X seqLength ), featSize
 	-- Out: ( numVideo X seqLength ), hiddenSize
-	local lstm = nn.Sequential(  )
-	lstm:add( nn.View( -1, opt.seqLength, featSize ) ) -- LSTM input is numVideo, SeqLength, vectorDim
-	lstm:add( nn.LSTM( featSize, hiddenSize ) )
-	lstm:add( nn.Tanh(  ) )
-	lstm:add( nn.View( -1, hiddenSize ) )
-	lstm:add( nn.Dropout( 0.5 ) )
-	lstm:cuda(  )
-	
-	-- Create LSTM classifier.
-	-- In:  ( numVideo * seqLength ), hiddenSize
-	-- out: ( numVideo * seqLength ), numCls
-	local classifierLstm = nn.Sequential(  )
-	classifierLstm:add( nn.Linear( hiddenSize, numCls ) )
-	classifierLstm:add( nn.LogSoftMax(  ) )
-	classifierLstm:cuda(  )
-	
+	local fc = nn.Sequential(  )
+	fc:add( nn.Linear( featSize, hiddenSize ) )
+	fc:add( nn.Tanh(  ) )
+	fc:add( nn.Dropout( 0.5 ) )
+	fc:cuda(  )
+
+	-- Create FC classifier.
+	-- In:  ( numVideo X seqLength ), featSize
+	-- Out: ( numVideo X seqLength ), numClass
+	local classifierFc = nn.Sequential(  )
+	classifierFc:add( nn.Linear( hiddenSize, numCls ) )
+	classifierFc:add( nn.LogSoftMax(  ) )
+	classifierFc:cuda(  )
+
 	-- Combine sub models.
 	-- In:  ( numVideo X seqLength ), 3, 224, 224
-	-- Out: ( numVideo X seqLength ), numCls
-	local model = nn.Sequential(  )
+	-- Out: ( numVideo X seqLength ), numClass
+   local model = nn.Sequential(  )
 	model:add( features )
-	model:add( lstm )
-	model:add( classifierLstm )
+	model:add( fc )
+	model:add( classifierFc )
 	model:cuda(  )
 
 	-- Check options.
@@ -52,7 +51,7 @@ function createModel( nGPU )
 	assert( not opt.normalizeStd )
 	assert( not opt.keepAspect )
 	collectgarbage(  )
-   return model
+	return model
 end
 
 function loadModel( modelPath )
@@ -65,7 +64,7 @@ end
 function groupParams( model )
 	local params, grads, optims = {  }, {  }, {  }
 	params[ 1 ], grads[ 1 ] = model.modules[ 1 ]:getParameters(  ) -- Features.
-	params[ 2 ], grads[ 2 ] = model.modules[ 2 ]:getParameters(  ) -- LSTM.
+	params[ 2 ], grads[ 2 ] = model.modules[ 2 ]:getParameters(  ) -- FC.
 	params[ 3 ], grads[ 3 ] = model.modules[ 3 ]:getParameters(  ) -- Classifier.
 	optims[ 1 ] = { -- Features.
 		learningRate = opt.lrFeature,
@@ -74,8 +73,8 @@ function groupParams( model )
 		dampening = 0.0,
 		weightDecay = opt.weightDecay 
 	}
-	optims[ 2 ] = { -- LSTM.
-		learningRate = opt.lrLstm,
+	optims[ 2 ] = { -- FC.
+		learningRate = opt.lrFc,
 		learningRateDecay = 0.0,
 		momentum = opt.momentum,
 		dampening = 0.0,
