@@ -104,7 +104,6 @@ function groupParams( model )
 	params[ 3 ], grads[ 3 ] = model.modules[ 2 ].modules[ 1 ].modules[ 1 ].modules[ 1 ].modules[ 2 ]:getParameters(  ) -- LSTM.
 	params[ 4 ], grads[ 4 ] = model.modules[ 2 ].modules[ 1 ].modules[ 2 ]:getParameters(  ) -- Agent.
 	params[ 5 ], grads[ 5 ] = model.modules[ 3 ]:getParameters(  ) -- Classifier.
-	local tdb = require( 'fb.debugger' ) tdb.enter(  )
 	optims[ 1 ] = { -- Features.
 		learningRate = opt.lrFeature,
 		learningRateDecay = 0.0,
