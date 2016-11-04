@@ -26,15 +26,15 @@ function createModel( nGPU )
 	-- Create FC tower.
 	-- In:  ( numVideo X seqLength ), featSize
 	-- Out: ( numVideo X seqLength ), hiddenSize
-	local fc = torch.load( '/home/dgyoo/workspace/dataout/video-representation-cvpr/UCF101/alexpt,fc256,cls,batchSize=256,epochSize=2384,lrAgent=0.00016,lrClassifier=0.00016,lrFc=0.00016,nEpochs=120/model_2.t7' )
-	fc = fc.modules[ 2 ]
+	local fc = torch.load( '/home/dgyoo/workspace/dataout/video-representation-cvpr/UCF101/alexpt,fc256,cls,batchSize=256,epochSize=2384,lrAgent=0.00016,lrClassifier=0.00016,lrFc=0.00016,nEpochs=120/model_30.t7' )
+	fc = fc.modules[ 2 ]:clone(  )
 	fc:cuda(  )
 
 	-- Create LSTM tower.
 	-- In:  ( numVideo X seqLength ), featSize
 	-- Out: ( numVideo X seqLength ), hiddenSize
-	local lstm = torch.load( '/home/dgyoo/workspace/dataout/video-representation-cvpr/UCF101/alexpt,lstm256,cls,batchSize=256,epochSize=2384,lrAgent=0.00016,lrClassifier=0.00016,lrFc=0.00016,nEpochs=120/model_2.t7' )
-	lstm = lstm.modules[ 2 ]
+	local lstm = torch.load( '/home/dgyoo/workspace/dataout/video-representation-cvpr/UCF101/alexpt,lstm256,cls,batchSize=256,epochSize=2384,lrAgent=0.00016,lrClassifier=0.00016,lrFc=0.00016,nEpochs=120/model_30.t7' )
+	lstm = lstm.modules[ 2 ]:clone(  )
 	lstm:cuda(  )
 	
 	-- Concat FC-LSTM.
